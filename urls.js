@@ -16,19 +16,18 @@ function saveURL(data, fileName) {
 
 function readFile(path) {
   const fileContents = fs.readFileSync(path, 'utf-8')
-  const lines = fileContents.split('\n').filter(line => line.trim() !== " ")
+  const lines = fileContents.split('\n').filter(line => line)
   const promises = lines.map(url => {
     return axios.get(url)
       .then(res => {
         const fileName = new URL(`${url}`).hostname
         saveURL(res.data, fileName)
+        return { url: fileName }
       })
       .catch(error => {
-        console.log("Error", error)
         return { url, error }
       })
   })
-  console.log(promises)
   Promise.all(promises)
     .then(results => {
       results.forEach(result => {

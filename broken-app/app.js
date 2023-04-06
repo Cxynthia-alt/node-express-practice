@@ -2,15 +2,15 @@ const express = require('express');
 const axios = require('axios');
 const app = express();
 
-app.post('/', function (req, res, next) {
+app.get('/', async function (req, res, next) {
   try {
-    let results = req.body.developers.map(async d => {
-      return await axios.get(`https://api.github.com/users/${d}`);
-    });
-    console.log(results)
-    let out = results.map(r => ({ name: r.data.name, bio: r.data.bio }));
+    let { developers } = req.query
+    let results = await Promise.all(developers.map(async d => {
+      const res = await axios.get(`https://api.github.com/users/${d}`)
+      return { bio: res.data.company, name: res.data.name }
+    }))
 
-    return res.send(JSON.stringify(out));
+    return res.send(JSON.stringify(results));
   } catch (err) {
     next(err);
   }
